@@ -35,7 +35,7 @@ sudo apt install --reinstall build-essential
 git clone ...
 cd arh-cpp
 sudo g++ src/main.cpp
-sudo chmod +x scripts/creare_rnd_bin.sh
+sudo chmod +x scripts/*
 sudo ./scripts/rnd_bin.sh
 sudo ./scripts/test.sh 
 ```
