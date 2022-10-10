@@ -8,9 +8,9 @@
 using namespace std;
 
 
-void arh_file(string &fname);
-void dearh_file(string &fname);
-float get_mean(string &fname);
+void arh_file(string &fname, bool debug);
+void dearh_file(string &fname, bool debug);
+float get_mean(string &fname, bool debug);
 
 int main(int argc, char* argv[])
 {
@@ -27,11 +27,15 @@ int main(int argc, char* argv[])
 	string fname (argv[1]);
 	string action(argv[2]);
 	
+	bool debug = false;
+	if (argc > 3 && "--debug" == argv[3]) 
+		debug = true;
+	
 	if ("-arh" == action)
-		arh_file(fname);
+		arh_file(fname, debug);
 	
 	else if ("-dearh" == action)
-		dearh_file(fname);
+		dearh_file(fname, debug);
 	
 	else 
 		cout<<"Command "<<action<<" is undefined"<<endl;
@@ -41,31 +45,30 @@ int main(int argc, char* argv[])
 
 }
 
-float get_mean(string &fname)
+float get_mean(string &fname, bool debug)
 {
 	FILE *f = fopen(fname.c_str(), "rb");
 	char byte[1];
 	int n;
-	float sum;
+	float sum = 0;
 	int j = 0;
-	int last = 0;
 	while(!feof(f))
     {
         if (fread(byte, 1, 1, f) != 1) continue;
 		bitset<8> x(*byte);
 		n = (int)(x.to_ulong());
 		sum += n;
-		//cout <<j<<"."<<x<<" - "<<n<<endl;
+		if (debug)
+			cout <<j<<"."<<x<<" - "<<n<<endl;
 		j++;
-		last = n;
-    }
-	//cout<<endl;
+	}
+	if (debug) cout<<endl;
 	fclose(f);
 	return sum/j;
 }
 
 
-void arh_file(string &fname)
+void arh_file(string &fname, bool debug)
 {
     FILE *f = fopen(fname.c_str(), "rb");
     if(!f)
@@ -78,7 +81,7 @@ void arh_file(string &fname)
 	string out = fname + ".arh";
 	FILE *arh=fopen(out.c_str(), "wb");
 	
-	float mean = get_mean(fname);
+	float mean = get_mean(fname, debug);
 	
 	int k = (int)log2f(mean);
 	int b = pow(2, k);
@@ -103,8 +106,8 @@ void arh_file(string &fname)
 		bitset<8> x(*byte);
 		n = (int)(x.to_ulong());
 		//cout <<j<<"."<<x<<" n= "<<n<<endl;
-		q = (n - 1) / b;
-		r = (n - 1) % b;
+		q = (n - 0) / b;
+		r = (n - 0) % b;
 		//bits += q + 1 + k;
 		//cout <<j<<"."<<x<<" - "<<n<<" q: "<<q<<" r: "<<r<<endl;
 		//next data
@@ -136,15 +139,32 @@ void arh_file(string &fname)
 		
 		j++;
     }
-	// end 
+	// end count 1 k + 1
+	
+	for (int i = 0; i <= k; i++)
+			data += "1";
+	
+	while( data.size()<8 )
+		data += "0";
+	
+	bitset<8> x = bitset<8> (data.substr(0, 8));
+	n = (int)(x.to_ulong());
+	fwrite(reinterpret_cast<const char *>(&n), 1, 1, arh);
+	data = data.substr(8, data.size() - 8);
+	bits += 8;
+	
+	// end zerro
+	
 	if (data.size()) {
+		
 		while( data.size()<8 )
 			data += "0";
-		//cout <<" data part "<<data<<" s "<<data.size()<<endl;
+		
 		bitset<8> x = bitset<8> (data.substr(0, 8));
 		n = (int)(x.to_ulong());
 		fwrite(reinterpret_cast<const char *>(&n), 1, 1, arh);
 		bits += 8;
+
 	}
 	
 	int size = j*8;
@@ -156,7 +176,7 @@ void arh_file(string &fname)
 }
 
 
-void dearh_file(string &fname)
+void dearh_file(string &fname, bool debug)
 {
     FILE *f = fopen(fname.c_str(), "rb");
     if(!f)
@@ -181,7 +201,8 @@ void dearh_file(string &fname)
 	string data = "";
 	bitset<8> x(*byte);
 	data = x.to_string();
-	//cout<<"first: "<<data<<endl;
+	if (debug)
+		cout<<"first: "<<data<<endl;
 	int k = 0;
 	while (data.substr(k, 1) == "1") 
 		k++;
@@ -192,7 +213,8 @@ void dearh_file(string &fname)
 	
 	bool wait_q = true;
 	bool wait_r = false;
-	int q, j, n, r;
+	int q, n, r;
+	int j = 0;
 	int bytes = 0;
 	while(!feof(f) || data.size() >= k)
     {
@@ -200,7 +222,8 @@ void dearh_file(string &fname)
 		if (fread(byte, 1, 1, f))
 		{
 			bitset<8> x(*byte);
-			//cout<<" add "<<x.to_string()<<endl;
+			if (debug)
+				cout<<" add "<<x.to_string()<<endl;
 			data += x.to_string();
 		}
 		//cout<<" data next "<<data<<" s "<<data.size()<<endl;
@@ -211,14 +234,18 @@ void dearh_file(string &fname)
 			while (data.substr(q, 1) == "1")
 				q++;
 			//cout<<" -> q = "<<q<<endl;
+			
 			try {
 				data = data.substr(q + 1, data.size() - q - 1);
 			} catch (const exception& e) {}
 			
 			//cout<<" part r "<<data<<" s "<<data.size()<<endl;
 			wait_q = false;
-			wait_r = true;
 			
+			if (q != k + 1) 
+				wait_r = true;
+			else //end
+			    data = "";
 		}
 		
 		if (wait_r) 
@@ -229,15 +256,15 @@ void dearh_file(string &fname)
 				//cout <<"data.size >= k"<<endl;
 				
 				
-				
 				r = (int)bitset<8>(data.substr(0, k)).to_ulong();
 				
 				//cout <<" data r "<<data.substr(0, k)<<endl;
 				
 				//cout <<" r = "<<r<<endl;
 				
-				n = q * b + r + 1;
-				//cout <<bytes<<"."<<" n = "<<n<<endl;
+				n = q * b + r + 0;
+				if (debug)
+					cout <<bytes<<"."<<" n = "<<n<<endl;
 				fwrite(reinterpret_cast<const char *>(&n), 1, 1, dearh);
 				bytes++;
 				try {

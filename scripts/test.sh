@@ -1,6 +1,4 @@
-rm rnd.bin
-rm rnd.bin.arh
-rm rnd.bin.arh.dearh
+rm rnd*
 sudo ./scripts/rnd_bin.sh
 md5sum rnd.bin
 sudo ./a.out rnd.bin -arh
