@@ -31,6 +31,7 @@
 WSL Ubuntu 16.04
 
 ```
+sudo apt update
 sudo apt install --reinstall build-essential
 git clone ...
 cd arh-cpp
