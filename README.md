@@ -1,3 +1,14 @@
+##### Содержание  
+
+[RiceEncoding aрхиватор](#riceencoding-aрхиватор)   
+[Использование](#использование)  
+ 	[Linux](#linux)  
+		[Зависимости](#зависимости)  
+		[Запуск](#запуск)  
+		[Тесты скриптами](#тесты-скриптами)  
+	[Windows](#windows)  
+		[Тестирование](#тестирование) 
+        
 # RiceEncoding aрхиватор
 
 Реализация архивации данных в виде последовательности целых чисел кодом RiceEncoding. 
@@ -67,7 +78,7 @@ Use [FILENAME] [ACTION] [OPTIONS].
 
 ```
 
-### Тесты
+### Тесты скриптами
 
 ```
 sudo chmod +x scripts/*
@@ -78,8 +89,6 @@ sudo ./scripts/test.sh
 ## Windows
 
 > Компилировать `win.cpp`, здесь хэш и тесты включены в сборку.
-
-### Запуск
 
 ```
 > win.exe 
@@ -102,8 +111,8 @@ Use [FILENAME] [ACTION] [OPTIONS].
         --debug          Optional flag to display information about bytes.
 ```
 
-### Тесты
+### Тестирование
 
 ```
-arh.exe test.exe --n 1000 --arh ---dearh
+arh.exe test.exe --n 1000 --arh --dearh
 ```
