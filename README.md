@@ -26,17 +26,84 @@
 Имя файла, и тип операции(арх или деарх) – параметры командной строки.
 Написать архиватор и деархиватор. Протестировать работу архиватора на случайно сгенерированных бинарных файлах, состоящих из целых чисел. Размер заархивированного файла должен быть всегда меньше файла исходного и однозначно деархивироваться до файла, совпадающего с исходным.
 
-# Использоватние
 
-WSL Ubuntu 16.04
+# Использование
+
+```
+git clone ...
+```
+
+
+## Linux
+
+### Зависимости
 
 ```
 sudo apt update
 sudo apt install --reinstall build-essential
-git clone ...
+```
+
+### Запуск
+
+```
 cd arh-cpp
 sudo g++ src/main.cpp
+./a.out
+Archiving with Rice encoding.
+
+Use [FILENAME] [ACTION] [OPTIONS].
+
+        FILENAME: The path to the archived file.
+
+        ACTIONS:
+
+        --arh            Archive file, output archive with '.arh' extension.
+        --dearh          Dearchive the file, the output is the original file, but with the extension '.dearh'.
+
+        OPTIONS:
+
+        --k              Parameter [1;8] for encoding Rice, default 6.
+        --debug          Optional flag to display information about bytes.
+
+```
+
+### Тесты
+
+```
 sudo chmod +x scripts/*
-sudo ./scripts/rnd_bin.sh
 sudo ./scripts/test.sh 
+```
+
+
+## Windows
+
+> Компилировать `win.cpp`, здесь хэш и тесты включены в сборку.
+
+### Запуск
+
+```
+> win.exe 
+Archiving with Rice encoding.
+
+Use [FILENAME] [ACTION] [OPTIONS].
+
+        FILENAME: The path to the archived file or the name for generating a new one,
+                  if the '--n' option is specified with the number of bytes
+
+        ACTIONS:
+
+        --arh            Archive file, output archive with '.arh' extension.
+        --dearh          Dearchive the file, the output is the original file, but with the extension '.dearh'.
+
+        OPTIONS:
+
+        --n              Creates a random binary file of the given length [n] wtis name [FILENAME].
+        --k              Parameter [1;8] for encoding Rice, default 6.
+        --debug          Optional flag to display information about bytes.
+```
+
+### Тесты
+
+```
+arh.exe test.exe --n 1000 --arh ---dearh
 ```
